@@ -1,4 +1,31 @@
-this is anil oraganization
-usman is just part of it.
-jgdjasbkjfbcsak
-
+pipeline {
+    agent any
+    stages{
+        stage('build maven'){
+            steps{
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Java-Techie-jt/devops-automation.git']])
+            
+                sh 'mvn clean install'
+            }
+            
+        }
+        stage('build docker image'){
+            steps{
+                script{
+                    sh 'sudo docker build -t anilemani/jaav-11-dev:1 . '
+                }
+            }
+        }
+            stage ('push image to docker hub'){
+                steps{
+                    script{
+                       withCredentials([string(credentialsId: 'dockerpasswd', variable: 'dokcer1')]) {
+                            sh 'sudo docker login -u anilemani -p ${dokcer1}'
+                    }
+                    sh 'sudo docker push anilemani/jaav-11-dev:1'
+                }
+            }
+        }
+        
+    }
+}
